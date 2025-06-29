@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,65 +6,76 @@
     <title>Baseball Performance Analysis Tool</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/recharts@2.8.0/umd/Recharts.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .lucide {
-            width: 1em;
-            height: 1em;
-            display: inline-block;
-            vertical-align: middle;
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div id="root"></div>
-    <script type="text/babel">
+    <script>
         const { useState, useRef, useEffect } = React;
-        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } = Recharts;
 
-        // Simple icon components (replacing lucide-react)
-        const Upload = () => (
-            <svg className="lucide" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-        );
+        // Simple icon components
+        const Upload = () => React.createElement('svg', { 
+            className: "w-12 h-12", 
+            fill: "none", 
+            stroke: "currentColor", 
+            viewBox: "0 0 24 24" 
+        }, React.createElement('path', { 
+            strokeLinecap: "round", 
+            strokeLinejoin: "round", 
+            strokeWidth: 2, 
+            d: "M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" 
+        }));
 
-        const Download = () => (
-            <svg className="lucide" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-        );
+        const Download = () => React.createElement('svg', { 
+            className: "w-5 h-5", 
+            fill: "none", 
+            stroke: "currentColor", 
+            viewBox: "0 0 24 24" 
+        }, React.createElement('path', { 
+            strokeLinecap: "round", 
+            strokeLinejoin: "round", 
+            strokeWidth: 2, 
+            d: "M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" 
+        }));
 
-        const FileText = () => (
-            <svg className="lucide" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-        );
+        const FileText = () => React.createElement('svg', { 
+            className: "w-6 h-6", 
+            fill: "none", 
+            stroke: "currentColor", 
+            viewBox: "0 0 24 24" 
+        }, React.createElement('path', { 
+            strokeLinecap: "round", 
+            strokeLinejoin: "round", 
+            strokeWidth: 2, 
+            d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
+        }));
 
-        const Target = () => (
-            <svg className="lucide" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" strokeWidth={2}></circle>
-                <circle cx="12" cy="12" r="6" strokeWidth={2}></circle>
-                <circle cx="12" cy="12" r="2" strokeWidth={2}></circle>
-            </svg>
-        );
+        const Target = () => React.createElement('svg', { 
+            className: "w-8 h-8", 
+            fill: "none", 
+            stroke: "currentColor", 
+            viewBox: "0 0 24 24" 
+        }, React.createElement('circle', { cx: "12", cy: "12", r: "10", strokeWidth: 2 }),
+           React.createElement('circle', { cx: "12", cy: "12", r: "6", strokeWidth: 2 }),
+           React.createElement('circle', { cx: "12", cy: "12", r: "2", strokeWidth: 2 }));
 
         const BaseballAnalyzer = () => {
           const [csvData, setCsvData] = useState(null);
           const [selectedPlayer, setSelectedPlayer] = useState('');
           const [playerData, setPlayerData] = useState(null);
-          const [chartType, setChartType] = useState('area');
+          const [chartType, setChartType] = useState('bar');
           const [recommendations, setRecommendations] = useState({
             kmotion: '',
             forceplate: '',
             swing: '',
-            movement: [
-              { test: '', findings: '' }
-            ]
+            movement: [{ test: '', findings: '' }]
           });
           const fileInputRef = useRef(null);
+          const chartRef1 = useRef(null);
+          const chartRef2 = useRef(null);
+          const chart1Instance = useRef(null);
+          const chart2Instance = useRef(null);
 
           const handleFileUpload = (event) => {
             const file = event.target.files[0];
@@ -117,7 +127,6 @@
               }
             }
 
-            // Calculate averages
             const averages = {};
             metrics.forEach(metric => {
               const values = swings.map(s => s[metric]).filter(v => v !== undefined && !isNaN(v));
@@ -126,24 +135,7 @@
               }
             });
 
-            return {
-              name: playerName,
-              swings,
-              averages,
-              rawData: player
-            };
-          };
-
-          useEffect(() => {
-            if (selectedPlayer) {
-              const data = processPlayerData(selectedPlayer);
-              setPlayerData(data);
-            }
-          }, [selectedPlayer, csvData]);
-
-          const getPlayerList = () => {
-            if (!csvData) return [];
-            return csvData.map(p => p['First Name'] + ' ' + p['Last Name']).filter(Boolean);
+            return { name: playerName, swings, averages, rawData: player };
           };
 
           const createDistributionData = (metric) => {
@@ -155,7 +147,7 @@
             const min = Math.min(...values);
             const max = Math.max(...values);
             const range = max - min;
-            const bins = 10;
+            const bins = Math.min(5, values.length); // Fewer bins for small datasets
             const binSize = range / bins;
 
             const distribution = [];
@@ -164,65 +156,99 @@
               const binEnd = min + (i + 1) * binSize;
               const count = values.filter(v => v >= binStart && v < binEnd).length;
               distribution.push({
-                bin: `${binStart.toFixed(1)}-${binEnd.toFixed(1)}`,
+                label: `${binStart.toFixed(1)}-${binEnd.toFixed(1)}`,
                 count,
-                density: count / values.length,
-                midpoint: (binStart + binEnd) / 2
+                density: count / values.length
               });
             }
 
             return distribution;
           };
 
-          const renderChart = (data, title, color) => {
-            if (!data || data.length === 0) return null;
+          const createChart = (canvasRef, data, title, color, chartInstance) => {
+            if (!data || data.length === 0 || !canvasRef.current) return;
 
-            const chartProps = {
-              width: 300,
-              height: 200,
-              data: data,
-              margin: { top: 5, right: 30, left: 20, bottom: 5 }
+            // Destroy existing chart
+            if (chartInstance.current) {
+              chartInstance.current.destroy();
+            }
+
+            const ctx = canvasRef.current.getContext('2d');
+            
+            const chartConfig = {
+              type: chartType === 'line' ? 'line' : 'bar',
+              data: {
+                labels: data.map(d => d.label),
+                datasets: [{
+                  label: 'Density',
+                  data: data.map(d => d.density),
+                  backgroundColor: chartType === 'line' ? 'transparent' : color + '80',
+                  borderColor: color,
+                  borderWidth: 2,
+                  fill: chartType === 'line'
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  title: {
+                    display: true,
+                    text: title
+                  },
+                  legend: {
+                    display: false
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    title: {
+                      display: true,
+                      text: 'Density'
+                    }
+                  },
+                  x: {
+                    title: {
+                      display: true,
+                      text: title
+                    }
+                  }
+                }
+              }
             };
 
-            switch (chartType) {
-              case 'bar':
-                return React.createElement(ResponsiveContainer, chartProps,
-                  React.createElement(BarChart, { data: data },
-                    React.createElement(CartesianGrid, { strokeDasharray: "3 3" }),
-                    React.createElement(XAxis, { dataKey: "bin", fontSize: 10 }),
-                    React.createElement(YAxis, { fontSize: 10 }),
-                    React.createElement(Tooltip, null),
-                    React.createElement(Bar, { dataKey: "density", fill: color })
-                  )
-                );
-              case 'line':
-                return React.createElement(ResponsiveContainer, chartProps,
-                  React.createElement(LineChart, { data: data },
-                    React.createElement(CartesianGrid, { strokeDasharray: "3 3" }),
-                    React.createElement(XAxis, { dataKey: "bin", fontSize: 10 }),
-                    React.createElement(YAxis, { fontSize: 10 }),
-                    React.createElement(Tooltip, null),
-                    React.createElement(Line, { type: "monotone", dataKey: "density", stroke: color, strokeWidth: 2 })
-                  )
-                );
-              default: // area
-                return React.createElement(ResponsiveContainer, chartProps,
-                  React.createElement(AreaChart, { data: data },
-                    React.createElement(CartesianGrid, { strokeDasharray: "3 3" }),
-                    React.createElement(XAxis, { dataKey: "bin", fontSize: 10 }),
-                    React.createElement(YAxis, { fontSize: 10 }),
-                    React.createElement(Tooltip, null),
-                    React.createElement(Area, { type: "monotone", dataKey: "density", stroke: color, fill: color, fillOpacity: 0.6 })
-                  )
-                );
+            chartInstance.current = new Chart(ctx, chartConfig);
+          };
+
+          useEffect(() => {
+            if (selectedPlayer) {
+              const data = processPlayerData(selectedPlayer);
+              setPlayerData(data);
             }
+          }, [selectedPlayer, csvData]);
+
+          useEffect(() => {
+            if (playerData) {
+              const batSpeedData = createDistributionData('Bat Speed');
+              const rotAccData = createDistributionData('Rot. Acc.');
+              
+              setTimeout(() => {
+                createChart(chartRef1, batSpeedData, 'Bat Speed Distribution', '#3B82F6', chart1Instance);
+                createChart(chartRef2, rotAccData, 'Rotational Acceleration Distribution', '#EF4444', chart2Instance);
+              }, 100);
+            }
+          }, [playerData, chartType]);
+
+          const getPlayerList = () => {
+            if (!csvData) return [];
+            return csvData.map(p => p['First Name'] + ' ' + p['Last Name']).filter(Boolean);
           };
 
           const generateReport = () => {
             if (!playerData) return;
 
-            const reportContent = `
-# ${playerData.name} - Performance Analysis & Recommendations
+            const reportContent = `# ${playerData.name} - Performance Analysis & Recommendations
 
 ## Performance Metrics
 - Exit Velocity: ${playerData.averages['Exit Velo']?.toFixed(1) || 'N/A'} mph
@@ -242,8 +268,7 @@ ${recommendations.forceplate}
 ${recommendations.swing}
 
 ## Movement Screen Assessment
-${recommendations.movement.filter(item => item.test).map(item => `**${item.test}**: ${item.findings}`).join('\n')}
-            `;
+${recommendations.movement.filter(item => item.test).map(item => `**${item.test}**: ${item.findings}`).join('\n')}`;
 
             const blob = new Blob([reportContent], { type: 'text/markdown' });
             const url = URL.createObjectURL(blob);
@@ -254,19 +279,21 @@ ${recommendations.movement.filter(item => item.test).map(item => `**${item.test}
             URL.revokeObjectURL(url);
           };
 
-          return React.createElement('div', { className: "max-w-6xl mx-auto p-6 bg-white" },
+          return React.createElement('div', { className: "max-w-6xl mx-auto p-6 bg-white min-h-screen" },
+            
+            // Header
             React.createElement('div', { className: "mb-8" },
               React.createElement('h1', { className: "text-3xl font-bold text-gray-800 mb-2 flex items-center gap-2" },
-                React.createElement(Target, { className: "w-8 h-8 text-blue-600" }),
+                React.createElement(Target, { className: "text-blue-600" }),
                 "Baseball Performance Analysis Tool"
               ),
               React.createElement('p', { className: "text-gray-600" }, "Upload CSV data and create professional performance reports")
             ),
 
-            // File Upload Section
+            // File Upload
             React.createElement('div', { className: "mb-8 p-6 border-2 border-dashed border-gray-300 rounded-lg" },
               React.createElement('div', { className: "text-center" },
-                React.createElement(Upload, { className: "w-12 h-12 text-gray-400 mx-auto mb-4" }),
+                React.createElement(Upload, { className: "text-gray-400 mx-auto mb-4" }),
                 React.createElement('h3', { className: "text-lg font-semibold mb-2" }, "Upload CSV Data"),
                 React.createElement('p', { className: "text-gray-600 mb-4" }, "Upload your baseball performance CSV file"),
                 React.createElement('input', {
@@ -285,6 +312,7 @@ ${recommendations.movement.filter(item => item.test).map(item => `**${item.test}
             ),
 
             csvData && React.createElement(React.Fragment, null,
+              
               // Player Selection
               React.createElement('div', { className: "mb-6" },
                 React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "Select Player"),
@@ -301,39 +329,37 @@ ${recommendations.movement.filter(item => item.test).map(item => `**${item.test}
               React.createElement('div', { className: "mb-6" },
                 React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "Chart Type"),
                 React.createElement('div', { className: "flex gap-4" },
-                  React.createElement('button', {
-                    onClick: () => setChartType('area'),
-                    className: `px-4 py-2 rounded-lg ${chartType === 'area' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`
-                  }, "Area Chart"),
-                  React.createElement('button', {
-                    onClick: () => setChartType('bar'),
-                    className: `px-4 py-2 rounded-lg ${chartType === 'bar' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`
-                  }, "Bar Chart"),
-                  React.createElement('button', {
-                    onClick: () => setChartType('line'),
-                    className: `px-4 py-2 rounded-lg ${chartType === 'line' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`
-                  }, "Line Chart")
+                  ['bar', 'line'].map(type =>
+                    React.createElement('button', {
+                      key: type,
+                      onClick: () => setChartType(type),
+                      className: `px-4 py-2 rounded-lg ${chartType === type ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`
+                    }, type.charAt(0).toUpperCase() + type.slice(1) + ' Chart')
+                  )
                 )
               ),
 
               playerData && React.createElement(React.Fragment, null,
+                
                 // Performance Analysis
                 React.createElement('div', { className: "mb-8" },
                   React.createElement('h2', { className: "text-2xl font-bold text-gray-800 mb-4" }, `${playerData.name} - Performance Analysis`),
                   
-                  // Distribution Charts
+                  // Charts
                   React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" },
                     React.createElement('div', { className: "bg-gray-50 p-4 rounded-lg" },
-                      React.createElement('h3', { className: "text-lg font-semibold mb-2" }, "Bat Speed Distribution"),
-                      renderChart(createDistributionData('Bat Speed'), 'Bat Speed', '#3B82F6')
+                      React.createElement('div', { style: { height: '300px' } },
+                        React.createElement('canvas', { ref: chartRef1 })
+                      )
                     ),
                     React.createElement('div', { className: "bg-gray-50 p-4 rounded-lg" },
-                      React.createElement('h3', { className: "text-lg font-semibold mb-2" }, "Rotational Acceleration Distribution"),
-                      renderChart(createDistributionData('Rot. Acc.'), 'Rotational Acceleration', '#EF4444')
+                      React.createElement('div', { style: { height: '300px' } },
+                        React.createElement('canvas', { ref: chartRef2 })
+                      )
                     )
                   ),
 
-                  // Performance Metrics Table
+                  // Metrics Table
                   React.createElement('div', { className: "bg-white border rounded-lg overflow-hidden mb-8" },
                     React.createElement('table', { className: "w-full" },
                       React.createElement('thead', { className: "bg-green-600 text-white" },
@@ -344,69 +370,48 @@ ${recommendations.movement.filter(item => item.test).map(item => `**${item.test}
                         )
                       ),
                       React.createElement('tbody', null,
-                        React.createElement('tr', { className: "border-b bg-green-50" },
-                          React.createElement('td', { className: "px-6 py-3 font-medium" }, "Exit Velocity"),
-                          React.createElement('td', { className: "px-6 py-3" }, playerData.averages['Exit Velo']?.toFixed(1) || 'N/A'),
-                          React.createElement('td', { className: "px-6 py-3 text-sm text-gray-600" }, "mph")
-                        ),
-                        React.createElement('tr', { className: "border-b bg-red-50" },
-                          React.createElement('td', { className: "px-6 py-3 font-medium" }, "Bat Speed"),
-                          React.createElement('td', { className: "px-6 py-3" }, playerData.averages['Bat Speed']?.toFixed(1) || 'N/A'),
-                          React.createElement('td', { className: "px-6 py-3 text-sm text-gray-600" }, "mph")
-                        ),
-                        React.createElement('tr', { className: "border-b bg-red-50" },
-                          React.createElement('td', { className: "px-6 py-3 font-medium" }, "Rotational Acceleration"),
-                          React.createElement('td', { className: "px-6 py-3" }, playerData.averages['Rot. Acc.']?.toFixed(1) || 'N/A'),
-                          React.createElement('td', { className: "px-6 py-3 text-sm text-gray-600" }, "deg/s²")
-                        ),
-                        React.createElement('tr', { className: "border-b bg-red-50" },
-                          React.createElement('td', { className: "px-6 py-3 font-medium" }, "VBA"),
-                          React.createElement('td', { className: "px-6 py-3" }, playerData.averages['VBA']?.toFixed(1) || 'N/A'),
-                          React.createElement('td', { className: "px-6 py-3 text-sm text-gray-600" }, "degrees")
-                        ),
-                        React.createElement('tr', { className: "border-b bg-green-50" },
-                          React.createElement('td', { className: "px-6 py-3 font-medium" }, "Attack Angle"),
-                          React.createElement('td', { className: "px-6 py-3" }, playerData.averages['Attack Angle']?.toFixed(1) || 'N/A'),
-                          React.createElement('td', { className: "px-6 py-3 text-sm text-gray-600" }, "degrees")
-                        ),
-                        React.createElement('tr', { className: "border-b bg-green-50" },
-                          React.createElement('td', { className: "px-6 py-3 font-medium" }, "On Plane Efficiency"),
-                          React.createElement('td', { className: "px-6 py-3" }, `${playerData.averages['On Plane Efficiency']?.toFixed(1) || 'N/A'}%`),
-                          React.createElement('td', { className: "px-6 py-3 text-sm text-gray-600" }, "percentage")
+                        [
+                          { metric: 'Exit Velocity', key: 'Exit Velo', unit: 'mph', color: 'green' },
+                          { metric: 'Bat Speed', key: 'Bat Speed', unit: 'mph', color: 'red' },
+                          { metric: 'Rotational Acceleration', key: 'Rot. Acc.', unit: 'deg/s²', color: 'red' },
+                          { metric: 'VBA', key: 'VBA', unit: 'degrees', color: 'red' },
+                          { metric: 'Attack Angle', key: 'Attack Angle', unit: 'degrees', color: 'green' },
+                          { metric: 'On Plane Efficiency', key: 'On Plane Efficiency', unit: 'percentage', color: 'green' }
+                        ].map(item =>
+                          React.createElement('tr', { key: item.key, className: `border-b bg-${item.color}-50` },
+                            React.createElement('td', { className: "px-6 py-3 font-medium" }, item.metric),
+                            React.createElement('td', { className: "px-6 py-3" }, 
+                              `${playerData.averages[item.key]?.toFixed(1) || 'N/A'}${item.key === 'On Plane Efficiency' ? '%' : ''}`
+                            ),
+                            React.createElement('td', { className: "px-6 py-3 text-sm text-gray-600" }, item.unit)
+                          )
                         )
                       )
                     )
                   )
                 ),
 
-                // Recommendations Input
+                // Recommendations
                 React.createElement('div', { className: "mb-8" },
                   React.createElement('h2', { className: "text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2" },
-                    React.createElement(FileText, { className: "w-6 h-6" }),
+                    React.createElement(FileText, null),
                     "Analysis & Recommendations"
                   ),
                   
                   React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-6" },
-                    React.createElement('div', null,
-                      React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "K-Motion Analysis"),
-                      React.createElement('textarea', {
-                        value: recommendations.kmotion,
-                        onChange: (e) => setRecommendations(prev => ({ ...prev, kmotion: e.target.value })),
-                        className: "w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                        rows: "4",
-                        placeholder: "Enter K-Motion analysis findings..."
-                      })
-                    ),
-                    
-                    React.createElement('div', null,
-                      React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "Force Plate Analysis"),
-                      React.createElement('textarea', {
-                        value: recommendations.forceplate,
-                        onChange: (e) => setRecommendations(prev => ({ ...prev, forceplate: e.target.value })),
-                        className: "w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                        rows: "4",
-                        placeholder: "Enter Force Plate analysis findings..."
-                      })
+                    ['kmotion', 'forceplate'].map(type =>
+                      React.createElement('div', { key: type },
+                        React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, 
+                          type === 'kmotion' ? 'K-Motion Analysis' : 'Force Plate Analysis'
+                        ),
+                        React.createElement('textarea', {
+                          value: recommendations[type],
+                          onChange: (e) => setRecommendations(prev => ({ ...prev, [type]: e.target.value })),
+                          className: "w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                          rows: "4",
+                          placeholder: `Enter ${type === 'kmotion' ? 'K-Motion' : 'Force Plate'} analysis findings...`
+                        })
+                      )
                     ),
                     
                     React.createElement('div', { className: "md:col-span-2" },
@@ -422,7 +427,7 @@ ${recommendations.movement.filter(item => item.test).map(item => `**${item.test}
                   )
                 ),
 
-                // Movement Screen Assessment
+                // Movement Screen
                 React.createElement('div', { className: "mb-8" },
                   React.createElement('h3', { className: "text-xl font-semibold text-gray-800 mb-4 flex items-center justify-between" },
                     "Movement Screen Assessment",
@@ -464,20 +469,20 @@ ${recommendations.movement.filter(item => item.test).map(item => `**${item.test}
                             const newMovement = recommendations.movement.filter((_, i) => i !== index);
                             setRecommendations(prev => ({ ...prev, movement: newMovement }));
                           },
-                          className: "bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition-colors"
+                          className: "bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition-colors text-sm"
                         }, "Remove")
                       )
                     )
                   )
                 ),
 
-                // Generate Report Button
+                // Generate Report
                 React.createElement('div', { className: "text-center" },
                   React.createElement('button', {
                     onClick: generateReport,
                     className: "bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 mx-auto"
                   },
-                    React.createElement(Download, { className: "w-5 h-5" }),
+                    React.createElement(Download, null),
                     "Generate Report"
                   )
                 )
